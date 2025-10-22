@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: example-apps
+  labels:
+    app: example-apps
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      deployment: example-apps
+  template:
+    metadata:
+      labels:
+        deployment: example-apps
+        app: example-apps
+    spec:
+      containers:
+        - name: example-apps
+          image: quay.io/lexsugar/duckhunt:latest
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          imagePullPolicy: IfNotPresent
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst
+      securityContext: {}
+      schedulerName: default-scheduler
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: example-apps
+  labels:
+    app: example-apps
+spec:
+  ports:
+    - name: web
+      protocol: TCP
+      port: 8080
+      targetPort: 8080
+  selector:
+    app: example-apps
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: example-apps
+spec:
+  path: /
+  to:
+    kind: Service
+    name: example-apps
+    weight: 100
+  port:
+    targetPort: web
+  tls:
+    termination: edge
+  wildcardPolicy: None
