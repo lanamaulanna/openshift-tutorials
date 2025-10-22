@@ -1,24 +1,23 @@
-kind: Deployment
 apiVersion: apps/v1
+kind: Deployment
 metadata:
-  annotations:
-  name: duckhunt
+  name: example-apps
   labels:
-    app: duckhunt
+    app: example-apps
 spec:
   replicas: 1
   selector:
     matchLabels:
-      deployment: duckhunt
+      deployment: example-apps
   template:
     metadata:
       labels:
-        deployment: duckhunt
-        app: duckhunt
+        deployment: example-apps
+        app: example-apps
     spec:
       containers:
-        - name: duckhunt
-          image: quay.io/sbergste/duckhunt:latest
+        - name: example-apps
+          image: quay.io/lexsugar/duckhunt:latest
           ports:
             - containerPort: 8080
               protocol: TCP
@@ -32,10 +31,12 @@ spec:
       securityContext: {}
       schedulerName: default-scheduler
 ---
-kind: Service
 apiVersion: v1
+kind: Service
 metadata:
-  name: duckhunt
+  name: example-apps
+  labels:
+    app: example-apps
 spec:
   ports:
     - name: web
@@ -43,4 +44,20 @@ spec:
       port: 8080
       targetPort: 8080
   selector:
-    app: duckhunt
+    app: example-apps
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: example-apps
+spec:
+  path: /
+  to:
+    kind: Service
+    name: example-apps
+    weight: 100
+  port:
+    targetPort: web
+  tls:
+    termination: edge
+  wildcardPolicy: None
