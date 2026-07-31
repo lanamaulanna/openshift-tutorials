@@ -1,0 +1,16 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: example-apps
+spec:
+  host: sample.xnet.bi.go.id   # custom domain di sini
+  path: /
+  to:
+    kind: Service
+    name: example-apps
+    weight: 100
+  port:
+    targetPort: web
+  tls:
+    termination: edge  # termination mengikut kebutuhan aplikasi. ada 3 opsi Edge, Passthrough, Re-encrypt
+  wildcardPolicy: None
